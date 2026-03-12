@@ -251,16 +251,26 @@
                     <th>Pos (Joint Rank)</th>
                     <th>Operating Team Entity</th>
                     <th>Aggregate Total Points</th>
+                    <th>Event Participation Breakdown</th>
                 </tr>
-                {% for rank, name, points in teams %}
+                {% for rank, name, points, scores in teams %}
                 <tr>
                     <td>{{ rank }}</td>
                     <td>{{ name }}</td>
                     <td>{{ points }}</td>
+                    <td>
+                        {% if scores %}
+                            {% for ev, pts in scores.items() %}
+                                Ev{{ ev }}: {{ pts }}pts{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span style="color: #64748b;">No events</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="3">Zero team entities currently available.</td>
+                    <td colspan="4">Zero team entities currently available.</td>
                 </tr>
                 {% endfor %}
             </table>
@@ -271,16 +281,26 @@
                     <th>Rank (Joint Rank)</th>
                     <th>Registered Participant</th>
                     <th>Calculated Total Points</th>
+                    <th>Event Participation Breakdown</th>
                 </tr>
-                {% for rank, name, points in individuals %}
+                {% for rank, name, points, scores in individuals %}
                 <tr>
                     <td>{{ rank }}</td>
                     <td>{{ name }}</td>
                     <td>{{ points }}</td>
+                    <td>
+                        {% if scores %}
+                            {% for ev, pts in scores.items() %}
+                                Ev{{ ev }}: {{ pts }}pts{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span style="color: #64748b;">No events</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="3">Zero individual profles registered presently.</td>
+                    <td colspan="4">Zero individual profiles registered presently.</td>
                 </tr>
                 {% endfor %}
             </table>

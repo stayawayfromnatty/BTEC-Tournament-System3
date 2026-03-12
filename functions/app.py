@@ -31,16 +31,16 @@ def calculate_points(position):
 
 def get_leaderboards():
     def process_ranking(total_list):
-        sorted_list = sorted(total_list, key=operator.itemgetter(1), reverse=True)
+        sorted_list = sorted(total_list, key=lambda x: x[1], reverse=True)
         ranked_list = []
         current_rank = 1
-        for i, (name, points) in enumerate(sorted_list):
+        for i, (name, points, scores) in enumerate(sorted_list):
             if i > 0 and points < sorted_list[i-1][1]:
                 current_rank = i + 1
-            ranked_list.append((current_rank, name, points))
+            ranked_list.append((current_rank, name, points, scores))
         return ranked_list
-    team_totals = [(name, sum(data['scores'].values())) for name, data in teams.items()]
-    individual_totals = [(name, sum(data['scores'].values())) for name, data in individuals.items()]
+    team_totals = [(name, sum(data['scores'].values()), data['scores']) for name, data in teams.items()]
+    individual_totals = [(name, sum(data['scores'].values()), data['scores']) for name, data in individuals.items()]
     return process_ranking(team_totals), process_ranking(individual_totals)
 
 @app.route('/')
