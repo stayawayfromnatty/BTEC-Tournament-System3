@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tournament Scoring System</title>
+
+    <style>
+        /* Custom Style Implementation */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #1f2937, #111827);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Ensure scrollability for multiple views */
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            width: 800px;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #38bdf8;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #38bdf8;
+            color: #0f172a;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+            transform: scale(1.03);
+        }
+
+        .section {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: none;
+            box-sizing: border-box;
+            /* Better width handling inside padded containers */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+
+        tr:nth-child(even) {
+            background: #1e293b;
+        }
+
+        /* Flash Messages Styling for Error Handling UI */
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .flash-success {
+            background-color: #059669;
+            /* Green hue */
+            color: white;
+        }
+
+        .flash-error {
+            background-color: #e11d48;
+            /* Red hue */
+            color: white;
+        }
+    </style>
+
+    <script>
+        // SPA-like View Controller Logic
+        function showSection(id) {
+            document.querySelectorAll('.section-content').forEach(el => el.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function toggleParticipantSelect() {
+            const type = document.getElementById('participant_type').value;
+
+            // Toggle Select Containers
+            document.getElementById('team_select_container').style.display = type === 'team' ? 'block' : 'none';
+            document.getElementById('ind_select_container').style.display = type === 'individual' ? 'block' : 'none';
+
+            // Crucial: Disable hidden inputs so HTTP POST does not inadvertently send bad data
+            document.getElementById('score_team_name').disabled = type !== 'team';
+            document.getElementById('score_ind_name').disabled = type !== 'individual';
+        }
+    </script>
+</head>
+
+<body onload="showSection('leaderboard_section')">
+
+    <div class="container">
+
+        <h1>Tournament Scoring System</h1>
+
+        <!-- Dynamic Error and Success Message Feedback Loop -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="menu">
+            <button onclick="showSection('reg_team_section')">Register Team</button>
+            <button onclick="showSection('reg_ind_section')">Register Individual</button>
+            <button onclick="showSection('record_score_section')">Record Event Score</button>
+            <button onclick="showSection('leaderboard_section')">View Leaderboard</button>
+        </div>
+
+        <!-- Register Team Component -->
+        <div id="reg_team_section" class="section section-content" style="display:none;">
+            <h2>Register Premium Team</h2>
+            <form action="/register_team" method="POST">
+                <label>Team Identity Name</label>
+                <input type="text" name="team_name" placeholder="Enter uniquely identifiable team name" required>
+                <button type="submit">Submit Representation</button>
+            </form>
+        </div>
+
+        <!-- Register Individual Component -->
+        <div id="reg_ind_section" class="section section-content" style="display:none;">
+            <h2>Register Individual Participant</h2>
+            <form action="/register_individual" method="POST">
+                <label>Participant Native Name</label>
+                <input type="text" name="individual_name" placeholder="Enter standard participant name" required>
+                <button type="submit">Submit Enrollment</button>
+            </form>
+        </div>
+
+        <!-- Event Score Logic Integrator -->
+        <div id="record_score_section" class="section section-content" style="display:none;">
+            <h2>Record or Update Event Score Data</h2>
+            <p style="font-size: 0.9em; color: #94a3b8; margin-top: -15px; margin-bottom: 20px;">Use this form to submit
+                a new score or correct an existing entry.</p>
+            <form action="/record_score" method="POST">
+                <label>Designated Participant Type</label>
+                <select id="participant_type" name="participant_type" onchange="toggleParticipantSelect()" required>
+                    <option value="none" selected disabled>Select Authorized Classification</option>
+                    <option value="team">Team Operation</option>
+                    <option value="individual">Individual Profile</option>
+                </select>
+
+                <div id="team_select_container" style="display:none;">
+                    <label>Select Accessible Team</label>
+                    <select id="score_team_name" name="name">
+                        {% for t in team_list %}
+                        <option value="{{ t }}">{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="ind_select_container" style="display:none;">
+                    <label>Select Associated Individual</label>
+                    <select id="score_ind_name" name="name">
+                        {% for i in ind_list %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <label>Standard Event Number (1 up to 5)</label>
+                <input type="number" name="event_num" min="1" max="5"
+                    placeholder="Enter explicit event sequence (e.g., 1)" required>
+
+                <label>Achieved Position / Rank (Max 24)</label>
+                <input type="text" name="position" placeholder="Specify attained position (e.g., 1 for leading 1st)"
+                    required>
+
+                <button type="submit">Commit or Update Points</button>
+            </form>
+        </div>
+
+        <!-- Real-time Leaderboard Analysis Displays -->
+        <div id="leaderboard_section" class="section section-content">
+            <h2>Consolidated Team Leaderboard</h2>
+            <table>
+                <tr>
+                    <th>Pos (Joint Rank)</th>
+                    <th>Operating Team Entity</th>
+                    <th>Aggregate Total Points</th>
+                </tr>
+                {% for rank, name, points in teams %}
+                <tr>
+                    <td>{{ rank }}</td>
+                    <td>{{ name }}</td>
+                    <td>{{ points }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">Zero team entities currently available.</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <h2 style="margin-top:30px;">Individual Competitor Leaderboard</h2>
+            <table>
+                <tr>
+                    <th>Rank (Joint Rank)</th>
+                    <th>Registered Participant</th>
+                    <th>Calculated Total Points</th>
+                </tr>
+                {% for rank, name, points in individuals %}
+                <tr>
+                    <td>{{ rank }}</td>
+                    <td>{{ name }}</td>
+                    <td>{{ points }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">Zero individual profles registered presently.</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

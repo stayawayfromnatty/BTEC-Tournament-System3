@@ -1,0 +1,13 @@
+[build]
+  command = "pip install -r requirements.txt && mkdir -p public"
+  functions = "functions"
+  publish = "public"
+
+[build.environment]
+  PYTHON_VERSION = "3"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/app"
+  status = 200
+  force = true
