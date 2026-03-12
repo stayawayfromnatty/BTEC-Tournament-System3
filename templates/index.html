@@ -146,11 +146,11 @@
             if (confirm('WARNING: Are you sure you want to completely reset all participants and scores? This action cannot be undone.')) {
                 fetch('/reset', { method: 'POST' })
                     .then(response => {
-                        window.location.href = '/';
+                        window.location.href = '/?t=' + new Date().getTime();
                     })
                     .catch(error => {
                         console.error('Error resetting:', error);
-                        window.location.href = '/';
+                        window.location.href = '/?t=' + new Date().getTime();
                     });
             }
         }
