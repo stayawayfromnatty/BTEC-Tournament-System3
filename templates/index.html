@@ -164,6 +164,9 @@
             <button onclick="showSection('reg_ind_section')">Register Individual</button>
             <button onclick="showSection('record_score_section')">Record Event Score</button>
             <button onclick="showSection('leaderboard_section')">View Leaderboard</button>
+            <form action="/reset" method="POST" style="margin: 0; padding: 0; grid-column: span 2;" onsubmit="return confirm('WARNING: Are you sure you want to completely reset all participants and scores? This action cannot be undone.');">
+                <button type="submit" style="background: #e11d48; color: white;">Reset All Data</button>
+            </form>
         </div>
 
         <!-- Register Team Component -->

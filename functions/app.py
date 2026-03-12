@@ -1,5 +1,6 @@
 import os
 import operator
+import re
 import serverless_wsgi
 from flask import Flask, render_template, request, redirect, url_for, flash
 
@@ -17,7 +18,8 @@ MAX_PARTICIPANTS_TOTAL = MAX_TEAMS + MAX_INDIVIDUALS
 POINTS_SCHEME = {1: 10, 2: 8, 3: 6, 4: 4, 5: 2}
 
 def is_valid_name(name):
-    return any(char.isalpha() for char in name)
+    # Enforces alphanumeric and space characters only, and checks for at least one letter
+    return bool(re.match(r'^[a-zA-Z0-9\s]+$', name)) and any(char.isalpha() for char in name)
 
 def calculate_points(position):
     try:
@@ -98,6 +100,13 @@ def record_score():
                 flash("Error: Participant not found.", "error")
     except (ValueError, TypeError):
         flash("Validation Error: Please enter numeric values for event and position.", "error")
+    return redirect(url_for('index'))
+
+@app.route('/reset', methods=['POST'])
+def reset():
+    teams.clear()
+    individuals.clear()
+    flash("Success: All standard data and leaderboards have been reset.", "success")
     return redirect(url_for('index'))
 
 # Netlify Serverless Handler with Error Logging
