@@ -141,6 +141,19 @@
             document.getElementById('score_team_name').disabled = type !== 'team';
             document.getElementById('score_ind_name').disabled = type !== 'individual';
         }
+
+        function resetSystem() {
+            if (confirm('WARNING: Are you sure you want to completely reset all participants and scores? This action cannot be undone.')) {
+                fetch('/reset', { method: 'POST' })
+                    .then(response => {
+                        window.location.href = '/';
+                    })
+                    .catch(error => {
+                        console.error('Error resetting:', error);
+                        window.location.href = '/';
+                    });
+            }
+        }
     </script>
 </head>
 
@@ -164,9 +177,7 @@
             <button onclick="showSection('reg_ind_section')">Register Individual</button>
             <button onclick="showSection('record_score_section')">Record Event Score</button>
             <button onclick="showSection('leaderboard_section')">View Leaderboard</button>
-            <form action="/reset" method="POST" style="margin: 0; padding: 0; grid-column: span 2;" onsubmit="return confirm('WARNING: Are you sure you want to completely reset all participants and scores? This action cannot be undone.');">
-                <button type="submit" style="background: #e11d48; color: white;">Reset All Data</button>
-            </form>
+            <button onclick="resetSystem()" style="background: #e11d48; color: white; margin: 0; padding: 15px; grid-column: span 2;">Reset All Data</button>
         </div>
 
         <!-- Register Team Component -->
