@@ -5,7 +5,9 @@ import serverless_wsgi
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 # Consolidate Flask engine and Serverless handler into one file for Netlify
-app = Flask(__name__, template_folder='templates')
+# Robust absolute path for templates folder to ensure Netlify finds it
+template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+app = Flask(__name__, template_folder=template_dir)
 app.secret_key = 'btec_distinction_secure_secret'
 
 # --- Data Structures ---
@@ -114,9 +116,12 @@ def handler(event, context):
     try:
         return serverless_wsgi.handle_request(app, event, context)
     except Exception as e:
+        import traceback
+        error_info = traceback.format_exc()
         return {
             "statusCode": 500,
-            "body": f"Flask Engine Initialization Error: {str(e)}"
+            "body": f"Flask Engine Initialization Error: {str(e)}\n\nTraceback:\n{error_info}",
+            "headers": {"Content-Type": "text/plain"}
         }
 
 if __name__ == '__main__':
