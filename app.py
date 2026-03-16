@@ -71,14 +71,14 @@ def get_leaderboards():
         sorted_list = sorted(total_list, key=operator.itemgetter(1), reverse=True)
         ranked_list = []
         current_rank = 1
-        for i, (name, points) in enumerate(sorted_list):
+        for i, (name, points, scores) in enumerate(sorted_list):
             if i > 0 and points < sorted_list[i-1][1]:
                 current_rank = i + 1
-            ranked_list.append((current_rank, name, points))
+            ranked_list.append((current_rank, name, points, scores))
         return ranked_list
 
-    team_totals = [(name, sum(data['scores'].values())) for name, data in teams.items()]
-    individual_totals = [(name, sum(data['scores'].values())) for name, data in individuals.items()]
+    team_totals = [(name, sum(data['scores'].values()), data['scores']) for name, data in teams.items()]
+    individual_totals = [(name, sum(data['scores'].values()), data['scores']) for name, data in individuals.items()]
     
     return process_ranking(team_totals), process_ranking(individual_totals)
 
@@ -221,6 +221,18 @@ def record_score():
     except Exception as e:
         flash(f"An unexpected critical error occurred: {str(e)}", "error")
         
+    return redirect(url_for('index'))
+@app.route('/reset', methods=['POST'])
+def reset_data():
+    """
+    Purpose: Resets the entire application state by clearing the teams and individuals dictionaries.
+    Inputs: HTTP POST request.
+    Outputs: Redirect to the index page (though the JS handles the redirect as well).
+    """
+    global teams, individuals
+    teams.clear()
+    individuals.clear()
+    flash("System Reset: All participant data and scores have been cleared.", "success")
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
